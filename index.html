@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Patriks super CRUD</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"  crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <style>
+        @font-face {
+            font-family: 'Glyphicons Halflings';
+            src: url('../fonts/glyphicons-halflings-regular.eot');
+            src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+        }
+
+        .glyphicon {
+            position: relative;
+            top: 1px;
+            display: inline-block;
+            font-family: 'Glyphicons Halflings';
+            font-style: normal;
+            font-weight: normal;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .glyphicon-remove:before {
+            content: "\e014";
+        }
+
+        .glyphicon-edit:before {
+            content: "\e065";
+        }
+
+    </style>
+</head>
+
+<body>
+<input type="hidden" id="reviewid" value="0" />
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <h2>Padel Racket Reviews</h2>
+        </div>
+    </div>
+    <div class="col-sm-12">
+
+    </div>
+    <div class="row" id="listForm">
+        <div class="col-sm-12">
+            <table id="reviewTable"
+                   class="table table-bordered table-condensed table-striped">
+                <tr>Racket reviews</tr>
+                <thead>
+                <tr>
+                    <th>Edit</th>
+                    <th>Review Id</th>
+                    <th>Reviewer Name</th>
+                    <th>Racket Name</th>
+                    <th>Rating</th>
+                    <th>Avg rating</th>
+                    <th>Racket Id</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="col-sm-12">
+            <button type="button" id="addButton"
+                    class="btn btn-primary"
+                    onclick="addClick();">
+                Add new
+            </button>
+        </div>
+
+    </div>
+
+    <div class="row" id="editForm">
+        <div class="col-sm-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 id="action">Edit review</h3>
+                </div>
+
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label for="id">
+                            ID
+                        </label>
+                        <input type="text" id="id"
+                               class="form-control" readonly/>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label for="reviewerName">
+                                Reviewer Name
+                            </label>
+                            <input type="text" id="reviewerName"
+                                   class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="racketName">
+                                Racket Name
+                            </label>
+                            <input type="text" id="racketName"
+                                   class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="rating">
+                                Rating
+                            </label>
+                            <input type="text" id="rating"
+                                   class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="avgRating">
+                                Avg rating
+                            </label>
+                            <input type="text" id="avgRating"
+                                   class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="reviewText">
+                                Review text
+                            </label>
+                            <input type="text" id="reviewText"
+                                   class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="racketId">
+                                Racket Id
+                            </label>
+                            <input type="text" id="racketId"
+                                   class="form-control" />
+                        </div>
+
+                    </div>
+                    <div class="panel-footer">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <button type="button"
+                                        class="btn btn-primary"
+                                        onclick="updateCancelClick();">
+                                    Cancel
+                                </button>
+
+                                <button type="button" id="updateButton"
+                                        class="btn btn-primary"
+                                        onclick="updateClick();">
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div></div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            reviewList();
+        });
+
+        function updateClick() {
+            // Build review object from inputs
+            review = new Object();
+            review.reviewerName = $("#reviewerName").val();
+            review.racketName = $("#racketName").val();
+            review.rating = $("#rating").val();
+            review.racketAvgRating = $("#racketAvgRating").val();
+            review.reviewText = $("#reviewText").val();
+            review.racketId = $("#racketId").val();
+
+            if ($("#updateButton").text().trim() == "Add") {
+                addReview(review);
+            }
+            else {
+                updateReview(review);
+            }
+        }
+
+        function addClick() {
+            $("#updateButton").text("Add");
+            $("#action").text("Add review");
+            $("#editForm").show();
+
+            $("#id").val(0);
+            $("#reviewerName").val("");
+            $("#racketName").val("");
+            $("#rating").val("");
+            $("#avgRating").val("");
+            $("#reviewText").val("");
+            $("#racketId").val("");
+            $("#listForm").hide();
+
+        }
+
+        function updateReview(review) {
+            var url = "http://racketreviews.eu-west-1.elasticbeanstalk.com/racketreviews/" + review.id;
+            // Call Web API to update review
+            $.ajax({
+                url: url,
+                type: 'PUT',
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(review),
+                success: function (review) {
+                    reviewList();
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+
+        function addReview(review) {
+            // Call Web API to add a new review
+            $.ajax({
+                url: "http://racketreviews.eu-west-1.elasticbeanstalk.com/racketreviews/",
+                type: 'POST',
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(review),
+                success: function (review) {
+                    reviewList();
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+
+        function StartEdit(ctl) {
+            $("#listForm").hide();
+            $("#editForm").show();
+            // Get review id from data- attribute
+            var id = $(ctl).data("id");
+
+            // Store review id in hidden field
+            $("#reviewid").val(id);
+
+            // Call Web API to get a Review
+            $.ajax({
+                url: "http://racketreviews.eu-west-1.elasticbeanstalk.com/racketreviews/" + id,
+                type: 'GET',
+                dataType: 'json',
+                success: function (review) {
+                    reviewToFields(review);
+
+                    // Change Update Button Text
+                    $("#updateButton").text("Update");
+                    $("#action").text("Edit Review");
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+
+        function reviewToFields(review) {
+            $("#id").val(review.id);
+            $("#reviewerName").val(review.reviewerName);
+            $("#racketName").val(review.racketName);
+            $("#rating").val(review.rating);
+            $("#avgRating").val(review.avgRating);
+            $("#reviewText").val(review.reviewText);
+            $("#racketId").val(review.racketId);
+            $("#listForm").hide();
+        }
+
+        // Get all Reviews to display
+        function reviewList() {
+            $("#editForm").hide();
+            $("#listForm").show();
+
+            if ($("#reviewTable tbody").length == 0) {
+                $("#reviewTable").append("<tbody></tbody>");
+            }
+            $("#reviewTable tbody").empty();
+
+
+            // Call Web API to get a list of Reviews
+            $.ajax({
+                url: "http://racketreviews.eu-west-1.elasticbeanstalk.com/racketreviews",
+                type: 'GET',
+                dataType: 'json',
+                success: function (reviews) {
+                    reviewListSuccess(reviews);
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+
+        }
+
+        // Display all Reviews returned from Web API call
+        function reviewListSuccess(reviews) {
+            // Iterate over the collection of data
+            $.each(reviews, function (index, review) {
+                // Add a row to the Review table
+                reviewAddRow(review);
+            });
+        }
+
+        // Add Review row to <table>
+        function reviewAddRow(review) {
+            // Append row to <table>
+            $("#reviewTable tbody").append(
+                reviewBuildTableRow(review));
+        }
+
+        // Build a <tr> for a row of table data
+        function reviewBuildTableRow(review) {
+            var ret = "<tr>" +
+                "<td>" +
+                "<button type='button' " +
+                "onclick='StartEdit(this);' " +
+                "class='btn btn-default' " +
+                "data-id='" + review.id + "'>" +
+                "<span class='glyphicon glyphicon-edit' />" +
+                "</button>" +
+                "</td>" +
+                "<td>" + review.id + "</td>" +
+                "<td>" + review.reviewerName + "</td>" +
+                "<td>" + review.racketName + "</td>" +
+                "<td>" + review.rating + "</td>" +
+                "<td>" + review.racketAvgRating + "</td>" +
+                "<td>" + review.reviewText + "</td>" +
+                "<td>" + review.racketId + "</td>" +
+
+                "<td>" +
+                "<button type='button' " +
+                "onclick='reviewDelete(this);' " +
+                "class='btn btn-default' " +
+                "data-id='" + review.id + "'>" +
+                "<span class='glyphicon glyphicon-remove' />" +
+                "</button>" +
+                "</td>" +
+                "</tr>";
+
+            return ret;
+        }
+
+        function updateCancelClick() {
+            reviewList();
+        }
+
+        // Delete review from <table>
+        function reviewDelete(ctl) {
+            var id = $(ctl).data("id");
+            //// Call Web API to delete a review
+            $.ajax({
+                url: "http://racketreviews.eu-west-1.elasticbeanstalk.com/racketreviews/" + id,
+                type: 'DELETE',
+                success: function (review) {
+                    $(ctl).parents("tr").remove();
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+
+        // Handle exceptions from AJAX calls
+        function handleException(request, message, error) {
+            var msg = "";
+            msg += "Code: " + request.status + "\n";
+            msg += "Text: " + request.statusText + "\n";
+            if (request.responseJSON != null) {
+                msg += "Message" + request.responseJSON.Message + "\n";
+            }
+            console.log(msg);
+        }
+    </script>
+</body>
+</html>
